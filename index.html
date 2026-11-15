@@ -1,7 +1,38 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10111b"><title>GD Skin Studio — скачать</title>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GD Skin Studio</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#263b72,transparent 55%),#0d0e16;color:#f5f6ff;font:16px system-ui}.wrap{width:min(92%,900px);margin:auto}.nav{padding:22px 0;border-bottom:1px solid #ffffff18;font-weight:800}.hero{text-align:center;padding:80px 0 55px}.tag{color:#b9ccff;background:#5c8cff20;border:1px solid #5c8cff66;border-radius:30px;padding:8px 14px;font-size:13px}h1{font-size:clamp(42px,8vw,72px);line-height:1.05;margin:25px 0 15px}.grad{background:linear-gradient(90deg,#82a7ff,#67e6d8);color:transparent;background-clip:text}.lead{max-width:620px;margin:auto;color:#a7acc4;line-height:1.7}.btn{display:inline-block;margin:27px 6px 10px;padding:15px 23px;border-radius:13px;background:linear-gradient(110deg,#668fff,#4bd6ca);color:#101322;text-decoration:none;font-weight:800}.sub{color:#9299b5;font-size:12px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;padding:25px 0 65px}.card{background:#171a29;border:1px solid #292e45;border-radius:17px;padding:20px}.card p{color:#a7acc4;line-height:1.5;font-size:14px}.download{text-align:center;background:#1b2542;border:1px solid #536b9a66;border-radius:20px;padding:28px;margin-bottom:55px}.download p{color:#a7acc4;line-height:1.6}footer{text-align:center;color:#858ba6;border-top:1px solid #ffffff18;padding:25px;font-size:12px}
-</style></head><body><header class="wrap nav">◈ GD Skin Studio</header><main class="wrap"><section class="hero"><span class="tag">Творческая мастерская для Android</span><h1>Твой стиль.<br><span class="grad">Твои скины.</span></h1><p class="lead">Рисуй собственные дизайны, выбирай цвета и используй загруженные изображения как полупрозрачные ориентиры.</p><a class="btn" href="https://github.com/stefcuber14-alt/GD-Skin-Studio/releases/latest/download/GD-Skin-Studio.apk">⬇ Скачать APK</a><div class="sub">Бесплатный проект · Android</div></section>
-<section class="cards"><article class="card"><h3>🎨 Редактор</h3><p>Рисование пальцем, кисть, ластик, отмена и экспорт PNG.</p></article><article class="card"><h3>👾 Режимы</h3><p>Куб, корабль, шар, НЛО, волна, робот, паук и Swing.</p></article><article class="card"><h3>🖼️ Ориентир</h3><p>Загрузи свой образец и используй его при создании дизайна.</p></article></section>
-<section class="download"><h2>Скачать GD Skin Studio</h2><p>Кнопка откроет APK последнего опубликованного GitHub Release.</p><a class="btn" href="https://github.com/stefcuber14-alt/GD-Skin-Studio/releases/latest">Открыть страницу релизов ↗</a><p class="sub">Если релиз ещё не опубликован, APK пока недоступен.</p></section></main><footer>GD Skin Studio · Неофициальный фан-проект. Geometry Dash и игровые материалы принадлежат правообладателям.</footer></body></html>
+*{box-sizing:border-box}body{margin:0;padding:18px;background:linear-gradient(145deg,#11152b,#25134a);color:#f5f3ff;font:16px system-ui}
+main{max-width:760px;margin:auto}.card{background:#1b2035;border:1px solid #ffffff25;border-radius:18px;padding:16px;margin:14px 0}
+p,small{color:#c9c4df}.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button,.file{background:#8b5cf6;color:white;border:0;border-radius:10px;padding:11px 14px;font-weight:700}
+input[type=color]{width:48px;height:42px;background:none;border:0}canvas{width:100%;max-width:512px;aspect-ratio:1;background:#fff;border-radius:12px;display:block;margin:12px auto;touch-action:none}
+label{display:inline-flex;align-items:center;gap:7px;margin:5px}
+</style></head><body><main>
+<h1>GD Skin Studio</h1><p>Создай собственный пиксельный скин Geometry Dash.</p>
+<section class="card">
+<div class="tools"><label>Цвет <input id="color" type="color" value="#35d7ff"></label>
+<label>Размер <input id="size" type="range" min="4" max="32" value="16"></label>
+<button id="clear">Очистить</button></div>
+<canvas id="paint" width="512" height="512"></canvas>
+<div class="tools">
+<label class="file">Загрузить ориентир <input id="reference" type="file" accept="image/*" hidden></label>
+<label>Прозрачность <input id="opacity" type="range" min="0" max="100" value="35"></label>
+<button id="save">Скачать PNG</button></div>
+<small>Ориентир служит полупрозрачным фоном и не попадёт в экспортированный PNG.</small>
+</section></main>
+<script>
+const c=document.getElementById('paint'),ctx=c.getContext('2d');
+const color=document.getElementById('color'),size=document.getElementById('size');let drawing=false,ref=null;
+function redraw(){ctx.fillStyle='#fff';ctx.fillRect(0,0,512,512);if(ref){ctx.globalAlpha=Number(document.getElementById('opacity').value)/100;ctx.drawImage(ref,0,0,512,512);ctx.globalAlpha=1;}}
+function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*512/r.width,y:(e.clientY-r.top)*512/r.height}}
+function paint(e){if(!drawing)return;const p=pos(e),s=Number(size.value);ctx.fillStyle=color.value;ctx.fillRect(Math.floor(p.x/s)*s,Math.floor(p.y/s)*s,s,s)}
+c.addEventListener('pointerdown',e=>{drawing=true;c.setPointerCapture(e.pointerId);paint(e)});
+c.addEventListener('pointermove',paint);c.addEventListener('pointerup',()=>drawing=false);c.addEventListener('pointercancel',()=>drawing=false);
+document.getElementById('clear').onclick=redraw;
+document.getElementById('reference').onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();img.onload=()=>{ref=img;redraw()};img.src=URL.createObjectURL(f)};
+document.getElementById('opacity').oninput=redraw;
+document.getElementById('save').onclick=()=>{const out=document.createElement('canvas');out.width=out.height=512;out.getContext('2d').drawImage(c,0,0);const a=document.createElement('a');a.download='my-gd-skin.png';a.href=out.toDataURL('image/png');a.click()};
+redraw();
+</script></body></html>
